@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+/models/*
+!/models/.gitkeep
+/data/
+/logs/
+/scripts/update.sh
+/scripts/update.bat

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+command -v git >/dev/null 2>&1 || { echo "Git is required." >&2; exit 1; }
+if [[ -n "$(git status --porcelain --untracked-files=normal)" ]]; then
+    echo "Commit or stash local changes before updating." >&2
+    exit 1
+fi
+GIT_TERMINAL_PROMPT=0 git pull --ff-only
+# Optional: synchronize dependencies after updating.
+# uv sync
+# Optional: customize service name before enabling restart.
+# sudo systemctl restart some_project
+echo "Code update complete."

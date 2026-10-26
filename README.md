@@ -9,9 +9,9 @@
 - `systemd` 自启动服务模板。
 
 ## 目录说明
-`data/`：用于存放项目运行过程中使用的数据（如模型文件、缓存数据等）。
+`data/`：用于存放项目运行过程中使用的数据（如缓存数据等），已被 Git 忽略。模型权重统一放在 `models/`。
 
-`lgos/`：日志输出目录，由 `common_utils/logger.py` 自动创建和维护，支持：
+`logs/`：日志输出目录，由 `common_utils/logger.py` 自动创建和维护，支持：
 - 按天滚动。
 - 自动清理历史日志。
 - 自定义日志名。
@@ -60,3 +60,35 @@ src/
   - 允许自启动：`sudo systemctl enable some_project`
   - 开始、重启、停止服务：`sudo systemctl start / restart/ stop some_project`
   - 查看服务状态：`sudo systemctl status some_project`
+
+## 新增目录与部署文件
+
+- `models/`：存放本地模型权重，仅跟踪 `.gitkeep`，权重文件不会提交。使用本地权重时，将 `config.yaml` 中的 `model_name` 改为相应路径，如 `./models/bge-m3`。
+- `service_files/`：存放服务部署文件，原根目录的 `service_template` 已移到 `service_files/service_template`。
+- `scripts/`：存放自动更新代码的脚本示例。
+
+## 自动更新代码
+
+Linux：
+```bash
+cp scripts/update.sh.example scripts/update.sh
+bash scripts/update.sh
+```
+
+Windows（cmd）：
+```bat
+copy scripts\update.bat.example scripts\update.bat
+scripts\update.bat
+```
+
+脚本从自身位置定位项目根目录，先检查未提交修改（含未跟踪文件），再执行 `git pull --ff-only`。请先提交模板改动，并确保当前部署分支已配置 upstream。分支分叉、本地修改、认证或网络失败时以非零状态退出，不会自动丢弃修改。
+
+可通过 Linux cron 或 Windows 任务计划程序定时执行，使用脚本绝对路径，并确保 PATH 可找到 Git。无人值守环境请预先配置 SSH 密钥或 Git 凭据管理器；脚本禁用交互式凭据提示，请勿在脚本或远程 URL 中写入令牌。
+
+默认只更新代码。依赖变化时可启用脚本中的 `uv sync`（需确保 PATH 可找到 uv）；如需重启服务，按实际部署启用或补充重启命令并检查退出码。Linux 示例中的服务名需要修改。复制出的本地脚本已被 Git 忽略。
+
+## 环境文件与敏感信息
+
+首次运行前，从 `.env.example` 复制生成 `.env`：Linux 使用 `cp .env.example .env`，Windows 使用 `copy .env.example .env`。`OPENAI_API_KEY=ollama` 是本地 Ollama 示例值，真实凭据仅放入 `.env`。
+
+`.env`、模型权重、运行数据、日志和虚拟环境已加入 `.gitignore`。提交前检查 `git diff --cached`，不要在配置、脚本、文档中放入真实密钥、访问令牌、私钥或生产连接串。忽略规则不会删除 Git 历史中的内容；如果真实凭据曾被提交，需先撤销或轮换，再按需清理历史。

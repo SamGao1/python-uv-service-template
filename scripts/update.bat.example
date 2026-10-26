@@ -1,0 +1,20 @@
+@echo off
+setlocal
+cd /d "%~dp0.." || exit /b 1
+where git >nul 2>&1
+if errorlevel 1 exit /b 1
+git status --porcelain --untracked-files=normal >nul 2>&1
+if errorlevel 1 exit /b 1
+for /f "delims=" %%L in ('git status --porcelain --untracked-files^=normal') do (
+    echo Commit or stash local changes before updating. 1>&2
+    exit /b 1
+)
+set "GIT_TERMINAL_PROMPT=0"
+git pull --ff-only
+if errorlevel 1 exit /b 1
+rem Optional: synchronize dependencies after updating.
+rem call uv sync
+rem if errorlevel 1 exit /b 1
+rem Add your Windows service restart command here and check its exit code.
+echo Code update complete.
+exit /b 0
