@@ -9,6 +9,12 @@
 - `systemd` 自启动服务模板。
 
 ## 目录说明
+`models/`：存放本地模型权重，仅跟踪 `.gitkeep`，权重文件不会提交。使用本地权重时，将 `config.yaml` 中的 `model_name` 改为相应路径，如 `./models/bge-m3`。
+
+`service_files/`：存放服务部署文件，`service_template` 为 systemd 服务模板。
+
+`scripts/`：存放 Linux / Windows 自动更新代码的脚本示例。
+
 `data/`：用于存放项目运行过程中使用的数据（如缓存数据等），已被 Git 忽略。模型权重统一放在 `models/`。
 
 `logs/`：日志输出目录，由 `common_utils/logger.py` 自动创建和维护，支持：
@@ -61,12 +67,6 @@ src/
   - 开始、重启、停止服务：`sudo systemctl start / restart/ stop some_project`
   - 查看服务状态：`sudo systemctl status some_project`
 
-## 新增目录与部署文件
-
-- `models/`：存放本地模型权重，仅跟踪 `.gitkeep`，权重文件不会提交。使用本地权重时，将 `config.yaml` 中的 `model_name` 改为相应路径，如 `./models/bge-m3`。
-- `service_files/`：存放服务部署文件，原根目录的 `service_template` 已移到 `service_files/service_template`。
-- `scripts/`：存放自动更新代码的脚本示例。
-
 ## 自动更新代码
 
 Linux：
@@ -85,7 +85,7 @@ scripts\update.bat
 
 可通过 Linux cron 或 Windows 任务计划程序定时执行，使用脚本绝对路径，并确保 PATH 可找到 Git。无人值守环境请预先配置 SSH 密钥或 Git 凭据管理器；脚本禁用交互式凭据提示，请勿在脚本或远程 URL 中写入令牌。
 
-默认只更新代码。依赖变化时可启用脚本中的 `uv sync`（需确保 PATH 可找到 uv）；如需重启服务，按实际部署启用或补充重启命令并检查退出码。Linux 示例中的服务名需要修改。复制出的本地脚本已被 Git 忽略。
+默认只更新代码，不会自动重启服务。Linux 脚本中的 `sudo systemctl restart some_project` 当前被注释；如需更新成功后重启服务，请先改为实际服务名，再取消该行注释，并确保执行用户具有对应的 sudo 权限。拉取失败时脚本会停止，不会执行重启。Windows 按实际部署补充重启命令并检查退出码。依赖变化时可启用脚本中的 `uv sync`（需确保 PATH 可找到 uv）。复制出的本地脚本已被 Git 忽略。
 
 ## 环境文件与敏感信息
 
